@@ -1,0 +1,31 @@
+repos:
+  - repo: local
+    hooks:
+      - id: isort
+        name: Reorder Python imports
+        language: python
+        entry: isort
+        types: [python]
+        args: ["--profile", "black"]
+      - id: black
+        name: Re-format Python files
+        language: python
+        entry: black
+        types: [python]
+  - repo: local
+    hooks:
+      - id: flake8
+        name: Lint Python files
+        language: python
+        entry: flake8
+        types: [python]
+        require_serial: true
+        args: ["--ignore=W503,W605,E203,E501"]
+  - repo: local
+    hooks:
+      - id: mypy
+        name: Check static typing
+        language: python
+        entry: mypy
+        types: [python]
+        args: [--ignore-missing-imports]
