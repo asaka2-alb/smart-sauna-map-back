@@ -1,1 +1,1 @@
-web: gunicorn smart-sauna-map:app --log-file=-
+web: gunicorn app:app --log-file=-
