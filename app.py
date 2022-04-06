@@ -14,7 +14,10 @@ CORS(app)  # Cross Origin Resource Sharing
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    query: Optional[str] = request.get_json()["query"]
+    try:
+        query: Optional[str] = request.get_json()["query"]
+    except:
+        return "<p>RuntimeError</p>"
     return make_response(jsonify(get_latlng_main(query)))
 
 
