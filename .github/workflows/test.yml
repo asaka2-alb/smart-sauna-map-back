@@ -27,3 +27,5 @@ jobs:
       - name: Run test
         run: |
           pytest
+        env:
+          GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
