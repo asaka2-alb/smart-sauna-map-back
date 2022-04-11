@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements-dev.txt
           pip install .
       - name: Run test
-        run: |
-          pytest
         env:
           GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
+        run: |
+          pytest
