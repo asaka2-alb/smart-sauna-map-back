@@ -8,5 +8,5 @@ def test_check_version():
 
 
 def test_check_flask_version():
-    expected_version = "2.0.2"
+    expected_version = "2.0.3"
     assert flask.__version__ == expected_version
