@@ -2,8 +2,12 @@ name: Test
 
 on: [pull_request]
 
+env:
+  GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
+
 jobs:
   test:
+    environment: test
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,7 +29,7 @@ jobs:
           pip install -r requirements-dev.txt
           pip install .
       - name: Run test
-        env:
-          GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
         run: |
-          pytest
+          echo $HOME
+          echo $GOOGLE_MAP_API_KEY
+          # pytest
