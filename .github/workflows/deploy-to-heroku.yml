@@ -1,11 +1,9 @@
 name: Deploy to heroku
 
-on:
-  push:
-    branches:
-      - main
+on: [pull_request]
 
 jobs:
+  environment: deploy
   build:
     runs-on: ubuntu-latest
     steps:
@@ -13,5 +11,5 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.8.8
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "smart-sauna-map-front"
+          heroku_app_name: "smart-sauna-map-back"
           heroku_email: ${{secrets.HEROKU_EMAIL}}
