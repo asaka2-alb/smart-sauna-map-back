@@ -30,6 +30,4 @@ jobs:
           pip install .
       - name: Run test
         run: |
-          # echo $HOME
-          # echo $GOOGLE_MAP_API_KEY
           pytest
