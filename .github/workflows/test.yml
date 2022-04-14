@@ -1,9 +1,13 @@
 name: Test
 
-on: [push, pull_request]
+on: [pull_request]
+
+env:
+  GOOGLE_MAP_API_KEY: ${{ secrets.GOOGLE_MAP_API_KEY }}
 
 jobs:
   test:
+    environment: test
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
