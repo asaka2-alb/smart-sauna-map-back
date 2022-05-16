@@ -25,6 +25,7 @@ def main(query: str) -> Dict[str, float]:
     res_byte = run(cmd, shell=True, stdout=PIPE, stderr=PIPE)
     res_dict = ast.literal_eval(res_byte.stdout.decode("utf-8"))
 
+    # TODO: We will remove this block, if an appropriate error handling will be implemented.
     if len(res_dict["results"]) != 1:
         return default_latlng, status["ng"]
 
