@@ -6,9 +6,9 @@ class TestGetLagLng:
 
     @pytest.mark.parametrize(
         "query,expected", [
-            ("新宿", {"lat": 35.6938253, "lng": 139.7033559}),
-            ("池袋", {"lat": 35.7348314, "lng": 139.7077314}),
-            ("押上", {"lat": 35.7113453, "lng": 139.8150661}),
+            ("新宿", ({"lat": 35.6938253, "lng": 139.7033559}, 200)),
+            ("池袋", ({"lat": 35.7348314, "lng": 139.7077314}, 200)),
+            ("押上", ({"lat": 35.7113453, "lng": 139.8150661}, 200)),
         ],
     )
     def test_normal(self, query, expected):
@@ -17,8 +17,8 @@ class TestGetLagLng:
 
     @pytest.mark.parametrize(
         "query,expected", [
-            ("", {"lat": 35.6938253, "lng": 139.7033559}),
-            ("存在しない地名xxx", {"lat": 35.6938253, "lng": 139.7033559}),
+            ("", ({"lat": 35.6938253, "lng": 139.7033559}, 404)),
+            ("存在しない地名xxx", ({"lat": 35.6938253, "lng": 139.7033559}, 404)),
         ],
     )
     def test_abnormal(self, query, expected):

@@ -13,12 +13,15 @@ GOOGLE_MAP_API_KEY = os.environ.get("GOOGLE_MAP_API_KEY")
 
 
 def geocode(query: str, timeout: float = 30.0) -> dict[str, float | None]:
+    # TODO: get_latlng.py と統合する
+    status = {"ok": 200, "ng": 404}
+
     location = geopy.geocoders.GoogleV3(
         api_key=GOOGLE_MAP_API_KEY, domain="maps.google.co.jp", timeout=timeout
     ).geocode(query)
     if location:
-        return {"lat": location.latitude, "lng": location.longitude}
-    return {"lat": None, "lng": None}
+        return {"lat": location.latitude, "lng": location.longitude}, status["ok"]
+    return {"lat": None, "lng": None}, status["ng"]
 
 
 if __name__ == "__main__":
