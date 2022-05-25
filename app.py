@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from flask import Flask, jsonify, make_response, request
+from flask import Flask, abort, jsonify, make_response, request
 from flask_cors import CORS  # type: ignore
 from smart_sauna_map.get_latlng import main as get_latlng_main
 
@@ -18,7 +18,12 @@ def index():
         query: Optional[str] = request.get_json()["query"]
     except:
         return "<p>RuntimeError</p>"
-    return make_response(jsonify(get_latlng_main(query)))
+
+    latlng, status = get_latlng_main(query)
+    if status == 404:
+        abort(404, description="Location not found.")
+
+    return make_response(jsonify(latlng))
 
 
 @app.route("/sauna", methods=["GET", "POST"])
@@ -55,6 +60,11 @@ def return_sample_response():
     return [
         {"id": 0, "text": "Hello, Smart Sauna Map!"},
     ]
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return e, 404
 
 
 if __name__ == "__main__":

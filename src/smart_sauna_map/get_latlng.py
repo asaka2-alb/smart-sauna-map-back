@@ -17,7 +17,6 @@ def main(query: str) -> Dict[str, float]:
     """Return a dict has "lat" and "lng" key."""
     # TODO: geocode.py と統合する
     default_latlng = {"lat": 35.6938253, "lng": 139.7033559}
-    status = {"ok": 200, "ng": 404}
 
     param = f"address\={quote(query)}\&region\=ja\&key\={GOOGLE_MAP_API_KEY}"
     url = f"https://maps.googleapis.com/maps/api/geocode/json\?{param}"
@@ -27,9 +26,9 @@ def main(query: str) -> Dict[str, float]:
 
     # TODO: We will remove this block, if an appropriate error handling will be implemented.
     if len(res_dict["results"]) != 1:
-        return default_latlng, status["ng"]
+        return default_latlng, 404
 
-    return res_dict["results"][0]["geometry"]["location"], status["ok"]
+    return res_dict["results"][0]["geometry"]["location"], 200
 
 
 if __name__ == "__main__":
