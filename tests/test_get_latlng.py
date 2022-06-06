@@ -2,6 +2,12 @@ from smart_sauna_map.get_latlng import main
 import pytest
 
 
+mock_res = {
+    'error_message': "Invalid request. Missing the 'address', 'components', 'latlng' or 'place_id' parameter.",
+    'results': [], 'status': 'INVALID_REQUEST'
+}
+
+
 class TestGetLagLng:
 
     @pytest.mark.parametrize(
@@ -17,10 +23,13 @@ class TestGetLagLng:
 
     @pytest.mark.parametrize(
         "query,expected", [
-            ("", ({"lat": 35.6938253, "lng": 139.7033559}, 404)),
-            ("存在しない地名xxx", ({"lat": 35.6938253, "lng": 139.7033559}, 404)),
+            ("", ({"lat": None, "lng": None}, 404)),
+            ("存在しない地名xxx", ({"lat": None, "lng": None}, 404)),
         ],
     )
-    def test_abnormal(self, query, expected):
+    def test_abnormal(self, mocker, query, expected):
+        mocker.patch(
+            "smart_sauna_map.get_latlng.get_lat_lng", return_value=mock_res
+        )
         res = main(query)
         assert res == expected
