@@ -4,8 +4,8 @@ from typing import Optional
 
 from flask import Flask, abort, jsonify, make_response, request
 from flask_cors import CORS  # type: ignore
-from smart_sauna_map.get_latlng import main as get_latlng_main
 
+from smart_sauna_map.get_latlng import main as get_latlng_main
 from smart_sauna_map.search_sauna import search_sauna
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
