@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import cache
 from dataclasses import dataclass
-from typing import Optional
+from typing import Final, Optional
 
 
 import urllib.parse
@@ -92,10 +92,13 @@ def _parse(res: str) -> BeautifulSoup:
 
 
 def _extract_saunas(soup: BeautifulSoup) -> list[Sauna]:
+    ok_status: Final[int] = 200
+
     names = _extract_sauna_names(soup)
     addresses = _extract_sauna_addresses(soup)
     ikitais = _extract_sauna_ikitai_from_contents(soup)
-    latlngs = [geocode(name) for name in list(names)]
+    latlngs_ = [geocode(name) for name in list(names)]
+    latlngs = [latlng for latlng, status in latlngs_ if status == ok_status]
 
     saunas: list[Sauna] = [
         Sauna(
