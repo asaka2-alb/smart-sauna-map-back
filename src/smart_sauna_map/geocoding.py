@@ -17,7 +17,7 @@ def geocode(query: str, *, timeout: float = 30.0) -> dict[str, float | None]:
         api_key=GOOGLE_MAP_API_KEY, domain="maps.google.co.jp", timeout=timeout
     ).geocode(query)
 
-    if location is None:
+    if not location:
         return {"lat": None, "lng": None}, 404
 
     return {"lat": location.latitude, "lng": location.longitude}, 200
