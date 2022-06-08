@@ -13,12 +13,11 @@ GOOGLE_MAP_API_KEY = os.environ.get("GOOGLE_MAP_API_KEY")
 
 
 def geocode(query: str, *, timeout: float = 30.0) -> dict[str, float | None]:
-    try:
-        location = geopy.geocoders.GoogleV3(
-            api_key=GOOGLE_MAP_API_KEY, domain="maps.google.co.jp", timeout=timeout
-        ).geocode(query)
-    except Exception:
-        # Exception would be 'Non-successful status code 400'
+    location = geopy.geocoders.GoogleV3(
+        api_key=GOOGLE_MAP_API_KEY, domain="maps.google.co.jp", timeout=timeout
+    ).geocode(query)
+
+    if location is None:
         return {"lat": None, "lng": None}, 404
 
     return {"lat": location.latitude, "lng": location.longitude}, 200

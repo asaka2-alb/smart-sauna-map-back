@@ -16,7 +16,7 @@ CORS(app)  # Cross Origin Resource Sharing
 def index():
     try:
         query: Optional[str] = request.get_json()["query"]
-    except Exception:
+    except:
         return "<p>RuntimeError</p>"
 
     latlng, status = geocode(query)
