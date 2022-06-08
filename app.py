@@ -5,7 +5,7 @@ from typing import Optional
 from flask import Flask, abort, jsonify, make_response, request
 from flask_cors import CORS  # type: ignore
 
-from smart_sauna_map.get_latlng import main as get_latlng_main
+from smart_sauna_map.geocoding import geocode
 from smart_sauna_map.search_sauna import search_sauna
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
@@ -16,12 +16,12 @@ CORS(app)  # Cross Origin Resource Sharing
 def index():
     try:
         query: Optional[str] = request.get_json()["query"]
-    except:
+    except Exception:
         return "<p>RuntimeError</p>"
 
-    latlng, status = get_latlng_main(query)
-    if status == 404:
-        abort(404, description="Location not found.")
+    latlng, status = geocode(query)
+    if status != 200:
+        abort(status, description="Location not found.")
 
     return make_response(jsonify(latlng))
 
