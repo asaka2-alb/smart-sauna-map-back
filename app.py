@@ -16,7 +16,7 @@ CORS(app)  # Cross Origin Resource Sharing
 def index():
     try:
         query: Optional[str] = request.get_json()["query"]
-    except:
+    except RuntimeError:
         return "<p>RuntimeError</p>"
 
     latlng, status = get_latlng_main(query)
@@ -28,12 +28,12 @@ def index():
 
 @app.route("/sauna", methods=["GET", "POST"])
 def sauna():
-    """Get sauna list.
+    """Get sauna list according to given keyword.
 
     Returns:
         Response: Hit saunas.
     Example:
-        >>> python src/smart_sauna_map/server.py
+        >>> python app.py
         >>> curl -X POST -H "Content-type: application/json"  -d '{"keyword": "御殿場", "prefecture": "shizuoka"}'  http://127.0.0.1:5000/sauna
     """
     keyword: str = request.get_json()["keyword"]

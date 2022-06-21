@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 import requests
 from requests.exceptions import HTTPError
-import pytest
 
-
-from smart_sauna_map.search_sauna import search_sauna, Sauna, _request, _sub_request
+from smart_sauna_map.search_sauna import (
+    MansRoom,
+    Sauna,
+    UnisexRoom,
+    WomansRoom,
+    search_sauna,
+)
 
 
 def read_html(filename):
@@ -27,9 +32,15 @@ LAT_LNG_SHINJUKU = {"lat": 35.69025476558695, "lng": 139.7006123537284}
 LAT_LNG_SHIKIJI = {"lat": 34.950765, "lng": 138.413977}
 
 SAUNA_SHIKIJI = Sauna(
+    sauna_id=123,
     name="サウナしきじ",
     address="静岡県静岡市駿河区敷地2丁目25-1",
     ikitai=7255,
+    image_url="http://example.com",
+    mans_room=MansRoom(100.0, 20.0),
+    womans_room=WomansRoom(101.0, 21.0),
+    unisex_room=UnisexRoom(102.0, 22.0),
+    description=["hogehoge", "awesome"],
     **LAT_LNG_SHIKIJI,
 )
 
