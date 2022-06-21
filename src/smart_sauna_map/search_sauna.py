@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import abc
 import re
-import urllib.parse
 from dataclasses import dataclass
 from functools import cache
 from typing import Optional
+from urllib.parse import urlencode, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,11 +18,38 @@ __all__ = ["search_sauna"]
 
 @dataclass
 class Sauna:
+    sauna_id: int
     name: str
     address: str
     ikitai: int
     lat: float | None
     lng: float | None
+    image_url: str | None
+    mans_room: MansRoom | None
+    womans_room: WomansRoom | None
+    unisex_room: UnisexRoom | None
+    description: list[str] | None
+
+
+@dataclass
+class BathRoom(abc.ABC):
+    sauna_temperature: float | None
+    mizuburo_temperature: float | None
+
+
+@dataclass
+class MansRoom(BathRoom):
+    pass
+
+
+@dataclass
+class WomansRoom(BathRoom):
+    pass
+
+
+@dataclass
+class UnisexRoom(BathRoom):
+    pass
 
 
 @cache
@@ -35,7 +63,8 @@ def search_sauna(
     Args:
         keyword: Search word to get sauna list. Defaults to "富士".
         prefecture: Prefecture to narrow down the search range. Defaults to "tokyo".
-        page_index: Page index to load sauna. One page contains 20 saunas. Defaults to 1.
+        page_index: Page index to load sauna. One page contains 20 saunas. Defaults to
+            1.
 
     Returns:
         List of sauna objects which contain the name, the address, the ikitai.
@@ -43,13 +72,22 @@ def search_sauna(
     Examples:
         >>> search_sauna(keyword="しきじ", prefecture="shizuoka", page_index=1)
         [
-            Sauna(name='サウナしきじ', address='静岡県静岡市駿河区敷地2丁目25-1', ikitai=7142),
-            Sauna(name='蓮台寺温泉 清流荘', address='静岡県下田市河内２-２', ikitai=1168),
-            Sauna(name='駿河健康ランド', address='静岡県静岡市清水区興津東町１２３４', ikitai=771),
-            ...,
-            Sauna(name='笑福の湯', address='静岡県焼津市柳新屋２４１-１', ikitai=162),
-            Sauna(name='赤沢日帰り温泉館', address='静岡県伊東市赤沢浮山170-2', ikitai=156),
-            Sauna(name='sauna MYSA', address='静岡県静岡市葵区足久保口組１６２０−１', ikitai=153),
+            Sauna(
+                sauna_id=2779,
+                name='サウナしきじ',
+                address='静岡県静岡市駿河区敷地2-25-1',
+                ikitai=8949,
+                lat=34.950765,
+                lng=138.413977,
+                image_url='https://img.sauna-ikitai.com/sauna/'
+                    '2779_20220429_182044_Eittr9xyyp_medium.jpg',
+                mans_room=MansRoom(sauna_temperature=110.0, mizuburo_temperature=19.0),
+                womans_room=WomansRoom(
+                    sauna_temperature=95.0,
+                    mizuburo_temperature=17.0,
+                ),
+                unisex_room=None, description=['入浴料：500円〜', '定休日：無休'],
+            )
         ]
     """
     response: str = _request(keyword, prefecture, page=page_index)
@@ -79,7 +117,7 @@ def _request(
 def _sub_request(
     url: str, payload: dict[str, str | int], timeout: float = 3.0
 ) -> requests.models.Response:
-    return requests.get(url, params=urllib.parse.urlencode(payload), timeout=timeout)
+    return requests.get(url, params=urlencode(payload), timeout=timeout)
 
 
 def _raise_error_if_status_code_is_not_200(res: requests.models.Response):
@@ -91,53 +129,142 @@ def _parse(res: str) -> BeautifulSoup:
 
 
 def _extract_saunas(soup: BeautifulSoup) -> list[Sauna]:
-    names = _extract_sauna_names(soup)
-    addresses = _extract_sauna_addresses(soup)
-    ikitais = _extract_sauna_ikitai_from_contents(soup)
-    latlngs = [geocode(name) for name in list(names)]
-
-    saunas: list[Sauna] = [
-        Sauna(
+    def sauna(s: BeautifulSoup) -> Sauna:
+        name = _extract_sauna_name(s)
+        latlng = geocode(name)
+        return Sauna(
+            sauna_id=_extract_sauna_id(s),
             name=name,
-            address=address,
-            ikitai=ikitai,
-            lat=latlng["lat"],
-            lng=latlng["lng"],
+            address=_extract_sauna_address(s),
+            ikitai=_extract_sauna_ikitai(s),
+            lat=latlng.get("lat", None),
+            lng=latlng.get("lng", None),
+            image_url=_extract_sauna_image_url(s),
+            mans_room=_extract_sauna_mans_room(s),
+            womans_room=_extract_sauna_womans_room(s),
+            unisex_room=_extract_sauna_unisex_room(s),
+            description=_extract_sauna_description(s),
         )
-        for name, address, ikitai, latlng in zip(names, addresses, ikitais, latlngs)
-    ]
-    return saunas
+
+    return [sauna(s) for s in soup.find_all(class_="p-saunaItem")]
 
 
-def _extract_sauna_names(soup: BeautifulSoup) -> list[str]:
+def _extract_sauna_name(soup: BeautifulSoup) -> str:
     def parse(s):
         return s.find("h3").text.strip()
 
-    return [parse(s) for s in soup.find_all(class_="p-saunaItemName")]
+    return parse(soup.find(class_="p-saunaItemName"))
 
 
-def _extract_sauna_addresses(soup: BeautifulSoup) -> list[str]:
+def _extract_sauna_address(soup: BeautifulSoup) -> str:
     def parse(s):
         return s.text.strip().replace("\xa0", "")
 
-    return [parse(s) for s in soup.find_all("address")]
+    return parse(soup.find("address"))
 
 
-def _extract_sauna_ikitai_from_contents(
+def _extract_sauna_id(soup: BeautifulSoup) -> int:
+    def parse(s):
+        url = s.find(name="a").get("href")
+        sauna_id = int(urlparse(url).path.split("/")[-1])
+        return sauna_id
+
+    return parse(soup)
+
+
+def _extract_sauna_image_url(soup: BeautifulSoup) -> str:
+    def parse(s):
+        url = str(s.find(name="img").get("src"))
+        return url
+
+    return parse(soup.find(class_="p-saunaItem_image"))
+
+
+def _extract_sauna_mans_room(soup: BeautifulSoup) -> MansRoom | None:
+    s = soup.find(class_="p-saunaItemSpec_content p-saunaItemSpec_content--man")
+    if not s:
+        return None
+    return MansRoom(
+        sauna_temperature=_find_sauna_temperature(s),
+        mizuburo_temperature=_find_mizuburo_temperature(s),
+    )
+
+
+def _extract_sauna_womans_room(soup: BeautifulSoup) -> WomansRoom | None:
+    s = soup.find(class_="p-saunaItemSpec_content p-saunaItemSpec_content--woman")
+    if not s:
+        return None
+    return WomansRoom(
+        sauna_temperature=_find_sauna_temperature(s),
+        mizuburo_temperature=_find_mizuburo_temperature(s),
+    )
+
+
+def _extract_sauna_unisex_room(soup: BeautifulSoup) -> UnisexRoom | None:
+    s = soup.find(class_="p-saunaItemSpec_content p-saunaItemSpec_content--unisex")
+    if not s:
+        return None
+    return UnisexRoom(
+        sauna_temperature=_find_sauna_temperature(s),
+        mizuburo_temperature=_find_mizuburo_temperature(s),
+    )
+
+
+def _find_sauna_temperature(s):
+    return _extract_digits(
+        s.find(class_="p-saunaItemSpec_item p-saunaItemSpec_item--sauna")
+        .find(class_="p-saunaItemSpec_value")
+        .text
+    )
+
+
+def _find_mizuburo_temperature(s):
+    return _extract_digits(
+        s.find(class_="p-saunaItemSpec_item p-saunaItemSpec_item--mizuburo")
+        .find(class_="p-saunaItemSpec_value")
+        .text
+    )
+
+
+def _extract_digits(text: str) -> float | None:
+    matched = re.match(r"\d+(\.\d+)?", text)
+    if not matched:
+        return None
+    return float(matched.group())
+
+
+def _extract_sauna_description(soup: BeautifulSoup) -> list[str]:
+    def parse(s):
+        descs = []
+        for _s in s.find_all(name="li"):
+            descs.append(_s.text)
+        return descs
+
+    return parse(soup.find(class_="p-saunaItem_informations"))
+
+
+def _extract_sauna_ikitai(
     soup, class_: str = "p-saunaItem_actions", search_string: str = "イキタイ"
-) -> list[int]:
-    ikitais = []
-    for actions in soup.find_all(class_=class_):
-        for content in actions.contents:
-            if search_string in content.text:
-                matched_texts = re.findall(r"[\d]+", content.text)
-                if len(matched_texts) > 1:
-                    raise ValueError(
-                        f"ikitai number is expected to have a digit, but found multiple ikitai number {matched_texts}."
-                    )
-                ikitai = int(matched_texts[0])
-                ikitais.append(ikitai)
-    return ikitais
+) -> int:
+    ikitai = None
+    contents = soup.find(class_=class_).contents
+
+    for content in contents:
+        if search_string in content.text:
+            matched_texts = re.findall(r"[\d]+", content.text)
+            if len(matched_texts) > 1:
+                raise ValueError(
+                    f"ikitai number must have a digit, but found multiple"
+                    f" digits {matched_texts}."
+                )
+            ikitai = int(matched_texts[0])
+
+    if ikitai is None:
+        raise ValueError(
+            f"ikitai number must be in content, but not found in {contents}."
+        )
+
+    return ikitai
 
 
 if __name__ == "__main__":
