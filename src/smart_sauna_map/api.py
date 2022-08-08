@@ -12,16 +12,25 @@ app = Flask(__name__, static_folder="./build/static", template_folder="./build")
 CORS(app)  # Cross Origin Resource Sharing
 
 
+@app.errorhandler(404)
+def handle_bad_request(error):
+    return {"lat": None, ...}, error.code
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
-    try:
-        query: Optional[str] = request.get_json()["query"]
-    except:
-        return "<p>RuntimeError</p>"
+    request_json: dict = request.get_json()
+    query: Optional[str] = request_json.get("query", None)
+    # if query is None:
+    #     return {"lat": None, }
+    #     abort(
+    #         404,
+    #         description=f"query must be a dict containing 'lat', and 'lng', but given"
+    #         f" {query}",
+    #     )
 
-    latlng, status = geocode(query)
-    if status != 200:
-        abort(status, description="Location not found.")
+    latlng = geocode(query)
+    print(latlng)
 
     return make_response(jsonify(latlng))
 
@@ -34,7 +43,8 @@ def sauna():
         Response: Hit saunas.
     Example:
         >>> python src/smart_sauna_map/server.py
-        >>> curl -X POST -H "Content-type: application/json"  -d '{"keyword": "御殿場", "prefecture": "shizuoka"}'  http://127.0.0.1:5000/sauna
+        >>> curl -X POST -H "Content-type: application/json"  -d '{"keyword": "御殿場",
+            "prefecture": "shizuoka"}'  http://127.0.0.1:5000/sauna
     """
     keyword: str = request.get_json()["keyword"]
     prefecture: str = request.get_json()["prefecture"]
@@ -44,7 +54,6 @@ def sauna():
 
 @app.after_request
 def after_request(response):
-    # response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
     return response
@@ -60,8 +69,3 @@ def return_sample_response():
     return [
         {"id": 0, "text": "Hello, Smart Sauna Map!"},
     ]
-
-
-@app.errorhandler(404)
-def not_found(e):
-    return e, 404
