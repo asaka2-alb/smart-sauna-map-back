@@ -12,25 +12,14 @@ app = Flask(__name__, static_folder="./build/static", template_folder="./build")
 CORS(app)  # Cross Origin Resource Sharing
 
 
-@app.errorhandler(404)
-def handle_bad_request(error):
-    return {"lat": None, ...}, error.code
-
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     request_json: dict = request.get_json()
     query: Optional[str] = request_json.get("query", None)
-    # if query is None:
-    #     return {"lat": None, }
-    #     abort(
-    #         404,
-    #         description=f"query must be a dict containing 'lat', and 'lng', but given"
-    #         f" {query}",
-    #     )
 
     latlng = geocode(query)
-    print(latlng)
+    if latlng["lat"] is None or latlng["lng"] is None:
+        abort(404)
 
     return make_response(jsonify(latlng))
 

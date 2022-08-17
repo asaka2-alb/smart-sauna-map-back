@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from functools import cache
-from dataclasses import dataclass
-from typing import Final, Optional
-
-
-import urllib.parse
 import re
+import urllib.parse
+from dataclasses import dataclass
+from functools import cache
+from typing import Optional
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -92,13 +91,10 @@ def _parse(res: str) -> BeautifulSoup:
 
 
 def _extract_saunas(soup: BeautifulSoup) -> list[Sauna]:
-    ok_status: Final[int] = 200
-
     names = _extract_sauna_names(soup)
     addresses = _extract_sauna_addresses(soup)
     ikitais = _extract_sauna_ikitai_from_contents(soup)
-    latlngs_ = [geocode(name) for name in list(names)]
-    latlngs = [latlng for latlng, status in latlngs_ if status == ok_status]
+    latlngs = [geocode(name) for name in list(names)]
 
     saunas: list[Sauna] = [
         Sauna(
