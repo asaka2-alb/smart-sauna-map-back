@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import pytest
 import requests
 from requests.exceptions import HTTPError
-import pytest
 
-
-from smart_sauna_map.search_sauna import search_sauna, Sauna, _request, _sub_request
+from smart_sauna_map.search_sauna import Sauna, search_sauna
 
 
 def read_html(filename):
