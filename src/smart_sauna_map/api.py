@@ -20,7 +20,7 @@ def geocode():
         Coordinate consists of latitude and longitude with JSON format.
 
     Examples:
-        >>> python src/smart_sauna_map/server.py
+        >>> python app.py
         >>> curl -X POST -H "Content-type: application/json"  -d '{"query": "御殿場"}'
             http://127.0.0.1:5000/geocode
         {"lat":35.3087683,"lng":138.9347872}
@@ -43,7 +43,7 @@ def search_sauna():
         Hit saunas with JSON format.
 
     Examples:
-        >>> python src/smart_sauna_map/server.py
+        >>> python app.py
         >>> curl -X POST -H "Content-type: application/json"  -d '{"keyword": "御殿場",
             "prefecture": "shizuoka"}'  http://127.0.0.1:5000/search_sauna
         [
