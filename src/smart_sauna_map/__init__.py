@@ -1,1 +1,3 @@
-version: str = "0.1.0"
+from smart_sauna_map.version import __version__
+
+__all__ = ["__version__"]
