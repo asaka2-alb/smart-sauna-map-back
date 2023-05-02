@@ -1,0 +1,51 @@
+{
+    "business_status": "OPERATIONAL",
+    "formatted_address": "日本、〒160-0021 東京都新宿区歌舞伎町１丁目２０−１ B1B2 Humax Pavilion 新宿",
+    "geometry": {
+        "location": {
+            "lat": 35.6958817,
+            "lng": 139.7015879
+        },
+        "viewport": {
+            "northeast": {
+                "lat": 35.69720952989272,
+                "lng": 139.7030304798927
+            },
+            "southwest": {
+                "lat": 35.69450987010728,
+                "lng": 139.7003308201073
+            }
+        }
+    },
+    "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/generic_business-71.png",
+    "icon_background_color": "#7B9EB0",
+    "icon_mask_base_uri": "https://maps.gstatic.com/mapfiles/place_api/icons/v2/generic_pinlet",
+    "name": "SOLA SPA 歌舞伎町 新宿の湯",
+    "opening_hours": {
+        "open_now": true
+    },
+    "photos": [
+        {
+            "height": 4000,
+            "html_attributions": [
+                "<a href=\"https://maps.google.com/maps/contrib/104664328694128894867\">豊田康弘</a>"
+            ],
+            "photo_reference": "AZose0mxdVOg-o7ArhH49wKxE-NlIXgCts4iIm6H_HC6OMwU7jnWfg0bJzoTuSkrexj7jLRj9IZssZUEipcLKq77vgavzi3cJxgd0LrR1uKOeZ96hBFmTTwcBuoPrIMthdJkBfsxMq1xJcJxsFQvPkG_4s5isAfufy7vie9wWzvae5XBBi-d",
+            "width": 3000
+        }
+    ],
+    "place_id": "ChIJpaKQwbSNGGARu2ACecsZ24Y",
+    "plus_code": {
+        "compound_code": "MPW2+9J 新宿区、東京都",
+        "global_code": "8Q7XMPW2+9J"
+    },
+    "rating": 2.2,
+    "reference": "ChIJpaKQwbSNGGARu2ACecsZ24Y",
+    "types": [
+        "spa",
+        "health",
+        "point_of_interest",
+        "establishment"
+    ],
+    "user_ratings_total": 103
+}
