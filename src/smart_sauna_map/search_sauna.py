@@ -5,6 +5,7 @@ from functools import cache
 from typing import Optional
 
 from smart_sauna_map.sauna import Sauna
+from smart_sauna_map.scraper.abstract_scraper import AbstractScraper
 from smart_sauna_map.scraper.sauna_ikitai_scraper import SaunaIkitaiScraper
 
 __all__ = ["search_sauna"]
@@ -13,11 +14,13 @@ __all__ = ["search_sauna"]
 @cache
 def search_sauna(
     keyword: Optional[str] = "しきじ",
+    scraper: AbstractScraper = SaunaIkitaiScraper(),
 ) -> list[Sauna]:
     """Get sauna information from sauna-ikitai.com with given parameters.
 
     Args:
         keyword: Search word to get sauna list. Defaults to "富士".
+        scraper: Instance of scraper object.
 
     Returns:
         List of sauna objects which contain the name, the address, the ikitai.
@@ -43,7 +46,4 @@ def search_sauna(
             )
         ]
     """
-    scraper = SaunaIkitaiScraper()
-    return scraper.search_sauna(
-        keyword=keyword,
-    )
+    return scraper.search_sauna(keyword=keyword)
