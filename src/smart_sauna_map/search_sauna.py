@@ -13,16 +13,11 @@ __all__ = ["search_sauna"]
 @cache
 def search_sauna(
     keyword: Optional[str] = "しきじ",
-    prefecture: Optional[str] = "shizuoka",
-    page_index: int = 1,
 ) -> list[Sauna]:
     """Get sauna information from sauna-ikitai.com with given parameters.
 
     Args:
         keyword: Search word to get sauna list. Defaults to "富士".
-        prefecture: Prefecture to narrow down the search range. Defaults to "tokyo".
-        page_index: Page index to load sauna. One page contains 20 saunas. Defaults to
-            1.
 
     Returns:
         List of sauna objects which contain the name, the address, the ikitai.
@@ -51,10 +46,4 @@ def search_sauna(
     scraper = SaunaIkitaiScraper()
     return scraper.search_sauna(
         keyword=keyword,
-        prefecture=prefecture,
-        page_index=page_index,
     )
-
-
-if __name__ == "__main__":
-    info = search_sauna(keyword="", prefecture="shizuoka", page_index=1)

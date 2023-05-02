@@ -19,22 +19,17 @@ class SaunaIkitaiScraper(AbstractScraper):
     def search_sauna(
         self,
         keyword: Optional[str] = "しきじ",
-        prefecture: Optional[str] = "shizuoka",
-        page_index: int = 1,
     ) -> list[Sauna]:
         """Get sauna information from sauna-ikitai.com with given parameters.
 
         Args:
             keyword: Search word to get sauna list. Defaults to "富士".
-            prefecture: Prefecture to narrow down the search range. Defaults to "tokyo".
-            page_index: Page index to load sauna. One page contains 20 saunas.
-                Defaults to 1.
 
         Returns:
             List of sauna objects which contain the name, the address, the ikitai.
 
         Examples:
-            >>> search_sauna(keyword="しきじ", prefecture="shizuoka", page_index=1)
+            >>> search_sauna(keyword="しきじ")
             [
                 Sauna(
                     sauna_id=2779,
@@ -56,24 +51,18 @@ class SaunaIkitaiScraper(AbstractScraper):
                 )
             ]
         """
-        response: str = self._request(keyword, prefecture, page=page_index)
+        response: str = self._request(keyword)
         soup: BeautifulSoup = self._parse(response)
         return self._extract_saunas(soup)
 
     def _request(
         self,
         keyword: Optional[str] = "富士",
-        prefecture: Optional[str] = "tokyo",
-        page: Optional[int] = 1,
     ) -> str:
         url = "https://sauna-ikitai.com/search"
         payload: dict[str, str | int] = {}
         if keyword:
             payload.update({"keyword": keyword})
-        if prefecture:
-            payload.update({"prefecture[]": prefecture})
-        if page:
-            payload.update({"page": page})
 
         res: requests.models.Response = self._sub_request(url, payload)
         self._raise_error_if_status_code_is_not_200(res)

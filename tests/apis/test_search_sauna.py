@@ -43,9 +43,7 @@ SAUNA_SHIKIJI = Sauna(
 
 class TestSearchSauna:
     @pytest.mark.parametrize("keyword", ["新宿"])
-    @pytest.mark.parametrize("prefecture", ["tokyo"])
-    @pytest.mark.parametrize("page_index", [1])
-    def test(self, mocker, keyword, prefecture, page_index):
+    def test(self, mocker, keyword):
         mocker.patch(
             "smart_sauna_map.scraper.sauna_ikitai_scraper.SaunaIkitaiScraper._request",
             return_value=HTML_SHINJUKU,
@@ -54,14 +52,14 @@ class TestSearchSauna:
             "smart_sauna_map.geocoding.geocode",
             return_value=LAT_LNG_SHINJUKU,
         )
-        search_sauna(keyword, prefecture, page_index)[0]
+        search_sauna(keyword)[0]
 
     def test_type(self, mocker):
         mocker.patch(
             "smart_sauna_map.scraper.sauna_ikitai_scraper.SaunaIkitaiScraper._request",
             return_value=HTML_SHIKIJI,
         )
-        out = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        out = search_sauna(keyword="サウナしきじ")[0]
         assert isinstance(out, Sauna)
 
     def test_name(self, mocker):
@@ -74,7 +72,7 @@ class TestSearchSauna:
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.name == expected.name
 
     def test_address(self, mocker):
@@ -87,7 +85,7 @@ class TestSearchSauna:
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.address == expected.address
 
     def test_ikitai(self, mocker):
@@ -100,7 +98,7 @@ class TestSearchSauna:
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.ikitai == expected.ikitai
 
     def test_get_200(self, mocker):
@@ -108,7 +106,7 @@ class TestSearchSauna:
             "smart_sauna_map.scraper.sauna_ikitai_scraper.SaunaIkitaiScraper._sub_request",
             return_value=mock_response(200),
         )
-        search_sauna(keyword="サウナしきじ", prefecture="shimane", page_index=1)
+        search_sauna(keyword="サウナしきじ")
 
     def test_get_404(self, mocker):
         mocker.patch(
@@ -116,4 +114,4 @@ class TestSearchSauna:
             return_value=mock_response(404),
         )
         with pytest.raises(HTTPError):
-            search_sauna(keyword="サウナしきじ", prefecture="tottori", page_index=1)
+            search_sauna(keyword="")
