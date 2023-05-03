@@ -6,8 +6,6 @@ import pytest
 import requests
 from requests.exceptions import HTTPError
 
-from smart_sauna_map.room import MansRoom, UnisexRoom, WomansRoom
-from smart_sauna_map.sauna import Sauna
 from smart_sauna_map.scraper.abstract_scraper import AbstractScraper
 from smart_sauna_map.scraper.google_map_scraper import GoogleMapScraper
 from smart_sauna_map.search_sauna import search_sauna
@@ -30,12 +28,17 @@ def scraper() -> AbstractScraper:
     return GoogleMapScraper()
 
 
-JSON_SHINJUKU = mock_sauna_response("gmap_shinjuku")
+SHINJUKU = {
+    "json": mock_sauna_response("gmap_shinjuku"),
+    "place_id": "ChIJpaKQwbSNGGARu2ACecsZ24Y",
+    "service_hours": "本日の営業時間: 24時間営業",
+    "lat_lng": {"lat": 35.69025476558695, "lng": 139.7006123537284},
+}
 
-PLACE_ID_SHINJUKU = "ChIJpaKQwbSNGGARu2ACecsZ24Y"
-PLACE_ID_SHIMOSUWA = "ChIJQSMyFFFVHGARwCusWN8A3KM"
-
-LAT_LNG_SHINJUKU = {"lat": 35.69025476558695, "lng": 139.7006123537284}
+SHIMOSUWA = {
+    "place_id": "ChIJQSMyFFFVHGARwCusWN8A3KM",
+    "service_hours": "本日の営業時間: 5時30分～22時00分",
+}
 
 
 class TestSearchSauna:
@@ -43,24 +46,35 @@ class TestSearchSauna:
     def test(self, mocker, keyword, scraper):
         mocker.patch(
             "smart_sauna_map.scraper.google_map_scraper.GoogleMapScraper._search_sauna",
-            return_value=JSON_SHINJUKU,
+            return_value=SHINJUKU["json"],
         )
         mocker.patch(
             "smart_sauna_map.geocoding.geocode",
-            return_value=LAT_LNG_SHINJUKU,
+            return_value=SHINJUKU["lat_lng"],
         )
         sauna = search_sauna(keyword, scraper)[0]
         assert sauna.name == "SOLA SPA 歌舞伎町 新宿の湯"
 
-    @pytest.mark.parametrize("place_id", [PLACE_ID_SHINJUKU, PLACE_ID_SHIMOSUWA])
+    @pytest.mark.parametrize("place_id", [SHINJUKU["place_id"], SHIMOSUWA["place_id"]])
     def test_get_image(self, scraper, place_id):
         # NOTE: 現状はただの疎通テストなのでassertを入れる
-        img_url = scraper._get_image(place_id)
+        _ = scraper._get_image(place_id)
+
+    @pytest.mark.parametrize(
+        "place_id, expected_service_hours",
+        [
+            (SHINJUKU["place_id"], SHINJUKU["service_hours"]),
+            (SHIMOSUWA["place_id"], SHIMOSUWA["service_hours"]),
+        ],
+    )
+    def test_get_service_hours(self, scraper, place_id, expected_service_hours):
+        service_hours = scraper._get_service_hours(place_id, weekday_id=0)
+        assert expected_service_hours == service_hours
 
     def test_get_200(self, mocker, scraper):
         mocker.patch(
             "smart_sauna_map.scraper.google_map_scraper.GoogleMapScraper._search_sauna",
-            return_value=JSON_SHINJUKU,
+            return_value=SHINJUKU["json"],
         )
         search_sauna(keyword="SOLA SPA 歌舞伎町 新宿の湯", scraper=scraper)
 
