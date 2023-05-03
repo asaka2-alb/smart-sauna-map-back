@@ -32,6 +32,9 @@ def scraper() -> AbstractScraper:
 
 JSON_SHINJUKU = mock_sauna_response("gmap_shinjuku")
 
+PLACE_ID_SHINJUKU = "ChIJpaKQwbSNGGARu2ACecsZ24Y"
+PLACE_ID_SHIMOSUWA = "ChIJQSMyFFFVHGARwCusWN8A3KM"
+
 LAT_LNG_SHINJUKU = {"lat": 35.69025476558695, "lng": 139.7006123537284}
 
 
@@ -48,6 +51,11 @@ class TestSearchSauna:
         )
         sauna = search_sauna(keyword, scraper)[0]
         assert sauna.name == "SOLA SPA 歌舞伎町 新宿の湯"
+
+    @pytest.mark.parametrize("place_id", [PLACE_ID_SHINJUKU, PLACE_ID_SHIMOSUWA])
+    def test_get_image(self, scraper, place_id):
+        # NOTE: 現状はただの疎通テストなのでassertを入れる
+        img_url = scraper._get_image(place_id)
 
     def test_get_200(self, mocker, scraper):
         mocker.patch(

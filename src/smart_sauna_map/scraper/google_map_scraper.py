@@ -20,6 +20,9 @@ GOOGLE_MAP_API_KEY = os.environ.get("GOOGLE_MAP_API_KEY")
 
 
 class GoogleMapScraper(AbstractScraper):
+    def __init__(self):
+        self.gmaps = googlemaps.Client(key=GOOGLE_MAP_API_KEY)
+
     @cache
     def search_sauna(
         self,
@@ -63,8 +66,7 @@ class GoogleMapScraper(AbstractScraper):
         return [self._cast_to_sauna(sauna) for sauna in saunas]
 
     def _search_sauna(self, keyword: str) -> list[dict]:
-        gmaps = googlemaps.Client(key=GOOGLE_MAP_API_KEY)
-        response = gmaps.places(f"{keyword} サウナ", language="ja")
+        response = self.gmaps.places(f"{keyword} サウナ", language="ja")
         return response["results"]
 
     def _is_abnormal_query(self, query: str) -> bool:
@@ -88,8 +90,7 @@ class GoogleMapScraper(AbstractScraper):
             ],  # TODO: Consider use rating or user_ratings_total or something
             lat=sauna["geometry"]["location"]["lat"],
             lng=sauna["geometry"]["location"]["lng"],
-            image_url="https://img.sauna-ikitai.com/sauna/"
-            "2779_20220429_182044_Eittr9xyyp_medium.jpg",  # TODO: Fix it
+            image_url=self._get_image(sauna["place_id"]),
             mans_room=MansRoom(
                 sauna_temperature=0.0, mizuburo_temperature=0.0
             ),  # TODO: Consider to abondone rooms and other information
@@ -99,4 +100,17 @@ class GoogleMapScraper(AbstractScraper):
             ),
             unisex_room=None,
             description=["入浴料：xxx円〜", "定休日：xxx曜日"],
+        )
+
+    def _get_image(self, place_id: str) -> str:
+        response = self.gmaps.place(place_id, language="ja")
+        photo_reference = (
+            response["result"]["photos"][0]["photo_reference"]
+            if "photos" in response["result"]
+            else "AF1QipNp-EQkrzLg0lwmkqtY-AACLSw0mSp0Ku0Euzyr"
+        )
+
+        return (
+            "https://maps.googleapis.com/maps/api/place/photo"
+            + f"?maxwidth=400&photoreference={photo_reference}&key={GOOGLE_MAP_API_KEY}"
         )
