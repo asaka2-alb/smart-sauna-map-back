@@ -47,7 +47,7 @@ class TestSearchSauna:
             return_value=LAT_LNG_SHINJUKU,
         )
         sauna = search_sauna(keyword, scraper)[0]
-        assert sauna.name == ""
+        assert sauna.name == "SOLA SPA 歌舞伎町 新宿の湯"
 
     def test_get_200(self, mocker, scraper):
         mocker.patch(
