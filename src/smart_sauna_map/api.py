@@ -54,8 +54,14 @@ def search_sauna():
     """
     keyword: str = request.get_json()["keyword"]
     prefecture: str = request.get_json()["prefecture"]
-    sauna = _search_sauna(keyword=keyword, prefecture=prefecture)
-    return make_response(jsonify(sauna))
+    # sauna = _search_sauna(keyword=keyword, prefecture=prefecture)
+    # saunas = _search_sauna_from_firebase(keyword=keyword)
+
+    # TODO: WIP
+    # fecther = FirebaseFetcher()
+    # saunas = search_sauna(fecther, ...)
+
+    return make_response(jsonify(saunas))
 
 
 @app.after_request

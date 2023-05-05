@@ -10,10 +10,16 @@ from urllib.parse import urlencode, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from firebase_admin import credentials, firestore, initialize_app
 
 from smart_sauna_map.geocoding import geocode
 
 __all__ = ["search_sauna"]
+
+# TODO: パッケージトップを指すパスを init.py などに定義すると良いかも
+SECRET = "./secrets/smart-sauna-map-firebase-adminsdk-kwl6u-5067562322.json"
+
+initialize_app(credentials.Certificate(SECRET))
 
 
 @dataclass
@@ -93,6 +99,141 @@ def search_sauna(
     response: str = _request(keyword, prefecture, page=page_index)
     soup: BeautifulSoup = _parse(response)
     return _extract_saunas(soup)
+
+
+class BaseFetcherFirebase(abc.ABC):
+    @abc.abstractmethod
+    def fetch_saunas(lat, lng, lat_width, lng_width):
+        pass
+
+
+class SaunaFetcher(BaseFetcherFirebase):
+    def __init__(self, collection_name: str = "saunas"):
+        self.db = get_firestore_database()
+        self.collection_name = collection_name
+
+    def fetch_saunas(
+        self,
+        lat: float,
+        lng: float,
+        lat_width: float,
+        lng_width: float,
+    ) -> List[Sauna]:
+        """Fetch saunas based on lat, lng.
+
+        Args:
+            lat: 緯度.
+            lng: 経度.
+            lat_width: 検索する緯度の幅.
+            lng_width: 検索する経度の幅.
+
+        Returns:
+            List[Sauna]: List of sauna.
+        """
+        # サウナ collection への reference を取得する
+        saunas_ref = get_collection_reference(self.db, self.collection_name)
+
+        # Firebase からデータをクエリする
+        lat_query_ref = saunas_ref.where("lat", ">", lat - lat_width).where(
+            "lat", "<", lat + lat_width
+        )
+        docs_extracted_by_lat = lat_query_ref.stream()
+
+        # Firebase では直接 lat, lng の2つで絞ることができないため、こちら側で絞る.
+        out_saunas = []
+        for doc_extracted_by_lat in docs_extracted_by_lat:
+            dict_extracted_by_lat = doc_extracted_by_lat.to_dict()
+            if is_within_designated_area(
+                lat=dict_extracted_by_lat["lat"],
+                lng=dict_extracted_by_lat["lng"],
+                lat_center=lat,
+                lng_center=lng,
+                lat_width=lat_width,
+                lng_width=lng_width,
+            ):
+                out_saunas.append(Sauna(**dict_extracted_by_lat))
+
+        return out_saunas
+
+
+# TODO: WIP
+# TODO: Firestore への接続まわりをオブジェクト化 あるいは unit of work にする
+@cache
+def search_sauna_from_firebase(
+    fetcher: Class,
+    keyword: Optional[str] = "しきじ",
+    lat_width: float = 0.2,
+    lng_width: float = 0.2,
+) -> list[Sauna]:
+    """Get sauna information from Firebase with given parameters.
+
+    Args:
+        keyword: Search word to get sauna list. Defaults to "富士".
+        lat_width: Valid width of latitude. The range is from -90 to 90.
+            The valid search area will be from lat - lat_width to lat + lat_width.
+        lng_width: Valid width of longitude. The range is from -180 to 180.
+            The valid search area will be from lng - lng_width to lng + lng_width.
+
+    Returns:
+        List of sauna objects which contain the name, the address, the ikitai.
+
+    Examples:
+        >>> search_sauna(keyword="しきじ", prefecture="shizuoka", page_index=1)
+        [
+            Sauna(
+                sauna_id=2779,
+                name='サウナしきじ',
+                address='静岡県静岡市駿河区敷地2-25-1',
+                ikitai=8949,
+                lat=34.950765,
+                lng=138.413977,
+                image_url='https://img.sauna-ikitai.com/sauna/'
+                    '2779_20220429_182044_Eittr9xyyp_medium.jpg',
+                mans_room=MansRoom(sauna_temperature=110.0, mizuburo_temperature=19.0),
+                womans_room=WomansRoom(
+                    sauna_temperature=95.0,
+                    mizuburo_temperature=17.0,
+                ),
+                unisex_room=None, description=['入浴料：500円〜', '定休日：無休'],
+            )
+        ]
+    """
+    # keyword をもとに geocode して lat, lon を得る
+    latlng = geocode(keyword if keyword is not None else "")
+    lat: float = latlng.get("lat", 35.0)  # TODO: デフォルト値は要検討
+    lng: float = latlng.get("lng", 135.0)
+
+    saunas = fetcher.fetch_saunas(
+        lat,
+        lng,
+        lat_width,
+        lng_width,
+    )
+    return saunas
+
+
+def get_firestore_database():
+    return firestore.client()
+
+
+def get_collection_reference(db, collection_name: str = "saunas"):
+    """Return reference of a firestore collection."""
+    return db.collection(collection_name)
+
+
+def is_within_designated_area(
+    lat: float,
+    lng: float,
+    lat_center: float,
+    lng_center: float,
+    lat_width: float,
+    lng_width: float,
+) -> bool:
+    if not (abs(lat - lat_center) < lat_width):
+        return False
+    if not (abs(lng - lng_center) < lng_width):
+        return False
+    return True
 
 
 def _request(
