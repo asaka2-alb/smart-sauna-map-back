@@ -45,8 +45,7 @@ def search_sauna():
 
     Examples:
         >>> python app.py
-        >>> curl -X POST -H "Content-type: application/json"  -d '{"keyword": "御殿場",
-            }'  http://127.0.0.1:5000/search_sauna
+        >>> curl -X POST -H "Content-type: application/json" -d '{"keyword": "御殿場"}' http://127.0.0.1:5000/search_sauna
         [
             {"address":"xxxxx","ikitai":1045,"lat":35.2987346,"lng":138.9451729,"name":"xxxx"},
             {"address":"xxxxx","ikitai":688,"lat":35.3047105,"lng":138.9671482,"name":"xxxx"},
