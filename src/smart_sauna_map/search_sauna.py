@@ -4,7 +4,7 @@ from __future__ import annotations
 from functools import cache
 from typing import Optional
 
-from smart_sauna_map.sauna import Sauna
+from smart_sauna_map.data_models.sauna import Sauna
 from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
 from smart_sauna_map.searcher.sauna_ikitai_searcher import SaunaIkitaiSearcher
 

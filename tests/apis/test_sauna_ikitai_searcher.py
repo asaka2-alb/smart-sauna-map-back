@@ -4,8 +4,8 @@ import pytest
 import requests
 from requests.exceptions import HTTPError
 
-from smart_sauna_map.room import MansRoom, UnisexRoom, WomansRoom
-from smart_sauna_map.sauna import Sauna
+from smart_sauna_map.data_models.room import MansRoom, UnisexRoom, WomansRoom
+from smart_sauna_map.data_models.sauna import Sauna
 from smart_sauna_map.search_sauna import search_sauna
 
 

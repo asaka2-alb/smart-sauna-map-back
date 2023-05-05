@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from smart_sauna_map.sauna import Sauna
+from smart_sauna_map.data_models.sauna import Sauna
 
 
 class AbstractSearcher(ABC):

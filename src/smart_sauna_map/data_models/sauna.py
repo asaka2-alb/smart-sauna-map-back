@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from smart_sauna_map.room import MansRoom, UnisexRoom, WomansRoom
+from smart_sauna_map.data_models.room import MansRoom, UnisexRoom, WomansRoom
 
 
 @dataclass

@@ -12,9 +12,9 @@ import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import HTTPError
 
+from smart_sauna_map.data_models.room import MansRoom, UnisexRoom, WomansRoom
+from smart_sauna_map.data_models.sauna import Sauna
 from smart_sauna_map.geocoding import geocode
-from smart_sauna_map.room import MansRoom, UnisexRoom, WomansRoom
-from smart_sauna_map.sauna import Sauna
 from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
 
 GOOGLE_MAP_API_KEY = os.environ.get("GOOGLE_MAP_API_KEY")
