@@ -11,10 +11,10 @@ from bs4 import BeautifulSoup
 from smart_sauna_map.geocoding import geocode
 from smart_sauna_map.room import MansRoom, UnisexRoom, WomansRoom
 from smart_sauna_map.sauna import Sauna
-from smart_sauna_map.scraper.abstract_scraper import AbstractScraper
+from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
 
 
-class SaunaIkitaiScraper(AbstractScraper):
+class SaunaIkitaiSearcher(AbstractSearcher):
     @cache
     def search_sauna(
         self,

@@ -6,8 +6,8 @@ from flask import Flask, abort, jsonify, make_response, request
 from flask_cors import CORS  # type: ignore
 
 from smart_sauna_map.geocoding import geocode as _geocode
-from smart_sauna_map.scraper.google_map_scraper import GoogleMapScraper
 from smart_sauna_map.search_sauna import search_sauna as _search_sauna
+from smart_sauna_map.searcher.google_map_searcher import GoogleMapSearcher
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
 CORS(app)  # Cross Origin Resource Sharing
@@ -54,7 +54,7 @@ def search_sauna():
         ]
     """
     keyword: str = request.get_json()["keyword"]
-    sauna = _search_sauna(keyword=keyword, scraper=GoogleMapScraper())
+    sauna = _search_sauna(keyword=keyword, searcher=GoogleMapSearcher())
     return make_response(jsonify(sauna))
 
 
