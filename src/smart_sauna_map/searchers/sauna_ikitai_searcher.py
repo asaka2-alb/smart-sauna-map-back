@@ -51,53 +51,57 @@ class SaunaIkitaiSearcher(AbstractSearcher):
                 )
             ]
         """
-        response: str = self._request(keyword)
-        soup: BeautifulSoup = self._parse(response)
-        return self._extract_saunas(soup)
+        response: str = _request(keyword)
+        soup: BeautifulSoup = _parse(response)
+        return _extract_saunas(soup)
 
-    def _request(
-        self,
-        keyword: Optional[str] = "富士",
-    ) -> str:
-        url = "https://sauna-ikitai.com/search"
-        payload: dict[str, str | int] = {}
-        if keyword:
-            payload.update({"keyword": keyword})
 
-        res: requests.models.Response = self._sub_request(url, payload)
-        self._raise_error_if_status_code_is_not_200(res)
-        return res.text
+def _request(
+    keyword: Optional[str] = "富士",
+) -> str:
+    url = "https://sauna-ikitai.com/search"
+    payload: dict[str, str | int] = {}
+    if keyword:
+        payload.update({"keyword": keyword})
 
-    def _sub_request(
-        self, url: str, payload: dict[str, str | int], timeout: float = 3.0
-    ) -> requests.models.Response:
-        return requests.get(url, params=urlencode(payload), timeout=timeout)
+    res: requests.models.Response = _sub_request(url, payload)
+    _raise_error_if_status_code_is_not_200(res)
+    return res.text
 
-    def _raise_error_if_status_code_is_not_200(self, res: requests.models.Response):
-        res.raise_for_status()
 
-    def _parse(self, res: str) -> BeautifulSoup:
-        return BeautifulSoup(res, "html.parser")
+def _sub_request(
+    url: str, payload: dict[str, str | int], timeout: float = 3.0
+) -> requests.models.Response:
+    return requests.get(url, params=urlencode(payload), timeout=timeout)
 
-    def _extract_saunas(self, soup: BeautifulSoup) -> list[Sauna]:
-        def sauna(s: BeautifulSoup) -> Sauna:
-            name = _extract_sauna_name(s)
-            latlng = geocode(name)
-            return Sauna(
-                sauna_id=_extract_sauna_id(s),
-                name=name,
-                address=_extract_sauna_address(s),
-                ikitai=_extract_sauna_ikitai(s),
-                lat=latlng.get("lat", None),
-                lng=latlng.get("lng", None),
-                image_url=_extract_sauna_image_url(s),
-                mans_room=_extract_sauna_mans_room(s),
-                womans_room=_extract_sauna_womans_room(s),
-                unisex_room=_extract_sauna_unisex_room(s),
-                description=_extract_sauna_description(s),
-            )
 
-        return [sauna(s) for s in soup.find_all(class_="p-saunaItem")]
+def _raise_error_if_status_code_is_not_200(res: requests.models.Response):
+    res.raise_for_status()
+
+
+def _parse(res: str) -> BeautifulSoup:
+    return BeautifulSoup(res, "html.parser")
+
+
+def _extract_saunas(soup: BeautifulSoup) -> list[Sauna]:
+    def sauna(s: BeautifulSoup) -> Sauna:
+        name = _extract_sauna_name(s)
+        latlng = geocode(name)
+        return Sauna(
+            sauna_id=_extract_sauna_id(s),
+            name=name,
+            address=_extract_sauna_address(s),
+            ikitai=_extract_sauna_ikitai(s),
+            lat=latlng.get("lat", None),
+            lng=latlng.get("lng", None),
+            image_url=_extract_sauna_image_url(s),
+            mans_room=_extract_sauna_mans_room(s),
+            womans_room=_extract_sauna_womans_room(s),
+            unisex_room=_extract_sauna_unisex_room(s),
+            description=_extract_sauna_description(s),
+        )
+
+    return [sauna(s) for s in soup.find_all(class_="p-saunaItem")]
 
 
 def _extract_sauna_name(soup: BeautifulSoup) -> str:
