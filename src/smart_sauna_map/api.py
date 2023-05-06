@@ -7,6 +7,8 @@ from flask_cors import CORS  # type: ignore
 
 from smart_sauna_map.geocoding import geocode as _geocode
 from smart_sauna_map.search_sauna import search_sauna as _search_sauna
+from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
+from smart_sauna_map.searcher.google_map_searcher import GoogleMapSearcher
 from smart_sauna_map.searcher.sauna_ikitai_searcher import SaunaIkitaiSearcher
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
@@ -53,12 +55,15 @@ def search_sauna():
         ]
     """
 
+    def _select_searcher(searcher_name: str) -> AbstractSearcher:
+        name2obj = {
+            "SaunaIkitaiSearcher": SaunaIkitaiSearcher(),
+            "GoogleMapSearcher": GoogleMapSearcher(),
+        }
+        return name2obj.get(searcher_name, SaunaIkitaiSearcher())
+
     keyword: str = request.get_json()["keyword"]
-    searcher: str = (
-        SaunaIkitaiSearcher()
-        if "searcher" not in request.get_json()
-        else eval(request.get_json()["searcher"] + "()")
-    )
+    searcher: str = _select_searcher(request.get_json().get("searcher", ""))
     sauna = _search_sauna(keyword=keyword, searcher=searcher)
     return make_response(jsonify(sauna))
 
