@@ -7,8 +7,8 @@ import requests
 from requests.exceptions import HTTPError
 
 from smart_sauna_map.search_sauna import search_sauna
-from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
-from smart_sauna_map.searcher.google_map_searcher import GoogleMapSearcher
+from smart_sauna_map.searchers.abstract_searcher import AbstractSearcher
+from smart_sauna_map.searchers.google_map_searcher import GoogleMapSearcher
 
 
 def mock_sauna_response(filename) -> list[dict]:
@@ -45,7 +45,7 @@ class TestSearchSauna:
     @pytest.mark.parametrize("keyword", ["新宿"])
     def test(self, mocker, keyword, searcher):
         mocker.patch(
-            "smart_sauna_map.searcher.google_map_searcher.GoogleMapSearcher._search_sauna",
+            "smart_sauna_map.searchers.google_map_searcher.GoogleMapSearcher._search_sauna",
             return_value=SHINJUKU["json"],
         )
         mocker.patch(
@@ -73,14 +73,14 @@ class TestSearchSauna:
 
     def test_get_200(self, mocker, searcher):
         mocker.patch(
-            "smart_sauna_map.searcher.google_map_searcher.GoogleMapSearcher._search_sauna",
+            "smart_sauna_map.searchers.google_map_searcher.GoogleMapSearcher._search_sauna",
             return_value=SHINJUKU["json"],
         )
         search_sauna(keyword="SOLA SPA 歌舞伎町 新宿の湯", searcher=searcher)
 
     def test_get_404(self, mocker, searcher):
         mocker.patch(
-            "smart_sauna_map.searcher.google_map_searcher.GoogleMapSearcher._search_sauna",
+            "smart_sauna_map.searchers.google_map_searcher.GoogleMapSearcher._search_sauna",
             return_value=mock_response(404),
         )
         with pytest.raises(HTTPError):

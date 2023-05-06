@@ -7,9 +7,9 @@ from flask_cors import CORS  # type: ignore
 
 from smart_sauna_map.geocoding import geocode as _geocode
 from smart_sauna_map.search_sauna import search_sauna as _search_sauna
-from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
-from smart_sauna_map.searcher.google_map_searcher import GoogleMapSearcher
-from smart_sauna_map.searcher.sauna_ikitai_searcher import SaunaIkitaiSearcher
+from smart_sauna_map.searchers.abstract_searcher import AbstractSearcher
+from smart_sauna_map.searchers.google_map_searcher import GoogleMapSearcher
+from smart_sauna_map.searchers.sauna_ikitai_searcher import SaunaIkitaiSearcher
 
 app = Flask(__name__, static_folder="./build/static", template_folder="./build")
 CORS(app)  # Cross Origin Resource Sharing

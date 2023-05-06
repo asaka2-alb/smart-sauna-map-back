@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from smart_sauna_map.data_models.room import MansRoom, UnisexRoom, WomansRoom
 from smart_sauna_map.data_models.sauna import Sauna
 from smart_sauna_map.geocoding import geocode
-from smart_sauna_map.searcher.abstract_searcher import AbstractSearcher
+from smart_sauna_map.searchers.abstract_searcher import AbstractSearcher
 
 
 class SaunaIkitaiSearcher(AbstractSearcher):

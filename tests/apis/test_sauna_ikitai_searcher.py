@@ -45,7 +45,7 @@ class TestSearchSauna:
     @pytest.mark.parametrize("keyword", ["新宿"])
     def test(self, mocker, keyword):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
             return_value=HTML_SHINJUKU,
         )
         mocker.patch(
@@ -56,7 +56,7 @@ class TestSearchSauna:
 
     def test_type(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
             return_value=HTML_SHIKIJI,
         )
         out = search_sauna(keyword="サウナしきじ")[0]
@@ -64,7 +64,7 @@ class TestSearchSauna:
 
     def test_name(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
             return_value=HTML_SHIKIJI,
         )
         mocker.patch(
@@ -77,7 +77,7 @@ class TestSearchSauna:
 
     def test_address(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
             return_value=HTML_SHIKIJI,
         )
         mocker.patch(
@@ -90,7 +90,7 @@ class TestSearchSauna:
 
     def test_ikitai(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._request",
             return_value=read_html("shikiji"),
         )
         mocker.patch(
@@ -103,14 +103,14 @@ class TestSearchSauna:
 
     def test_get_200(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._sub_request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._sub_request",
             return_value=mock_response(200),
         )
         search_sauna(keyword="サウナしきじ")
 
     def test_get_404(self, mocker):
         mocker.patch(
-            "smart_sauna_map.searcher.sauna_ikitai_searcher.SaunaIkitaiSearcher._sub_request",
+            "smart_sauna_map.searchers.sauna_ikitai_searcher.SaunaIkitaiSearcher._sub_request",
             return_value=mock_response(404),
         )
         with pytest.raises(HTTPError):
