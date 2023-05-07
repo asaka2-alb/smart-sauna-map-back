@@ -4,13 +4,9 @@ import pytest
 import requests
 from requests.exceptions import HTTPError
 
-from smart_sauna_map.search_sauna import (
-    MansRoom,
-    Sauna,
-    UnisexRoom,
-    WomansRoom,
-    search_sauna,
-)
+from smart_sauna_map.data_models.room import MansRoom, UnisexRoom, WomansRoom
+from smart_sauna_map.data_models.sauna import Sauna
+from smart_sauna_map.search_sauna import search_sauna
 
 
 def read_html(filename):
@@ -47,64 +43,75 @@ SAUNA_SHIKIJI = Sauna(
 
 class TestSearchSauna:
     @pytest.mark.parametrize("keyword", ["新宿"])
-    @pytest.mark.parametrize("prefecture", ["tokyo"])
-    @pytest.mark.parametrize("page_index", [1])
-    def test(self, mocker, keyword, prefecture, page_index):
+    def test(self, mocker, keyword):
         mocker.patch(
-            "smart_sauna_map.search_sauna._request", return_value=HTML_SHINJUKU
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._request",
+            return_value=HTML_SHINJUKU,
         )
         mocker.patch(
             "smart_sauna_map.geocoding.geocode",
             return_value=LAT_LNG_SHINJUKU,
         )
-        search_sauna(keyword, prefecture, page_index)[0]
+        search_sauna(keyword)[0]
 
     def test_type(self, mocker):
-        mocker.patch("smart_sauna_map.search_sauna._request", return_value=HTML_SHIKIJI)
-        out = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        mocker.patch(
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._request",
+            return_value=HTML_SHIKIJI,
+        )
+        out = search_sauna(keyword="サウナしきじ")[0]
         assert isinstance(out, Sauna)
 
     def test_name(self, mocker):
-        mocker.patch("smart_sauna_map.search_sauna._request", return_value=HTML_SHIKIJI)
+        mocker.patch(
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._request",
+            return_value=HTML_SHIKIJI,
+        )
         mocker.patch(
             "smart_sauna_map.geocoding.geocode",
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.name == expected.name
 
     def test_address(self, mocker):
-        mocker.patch("smart_sauna_map.search_sauna._request", return_value=HTML_SHIKIJI)
+        mocker.patch(
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._request",
+            return_value=HTML_SHIKIJI,
+        )
         mocker.patch(
             "smart_sauna_map.geocoding.geocode",
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.address == expected.address
 
     def test_ikitai(self, mocker):
         mocker.patch(
-            "smart_sauna_map.search_sauna._request", return_value=read_html("shikiji")
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._request",
+            return_value=read_html("shikiji"),
         )
         mocker.patch(
             "smart_sauna_map.geocoding.geocode",
             return_value=LAT_LNG_SHIKIJI,
         )
         expected = SAUNA_SHIKIJI
-        actual = search_sauna(keyword="サウナしきじ", prefecture="shizuoka", page_index=1)[0]
+        actual = search_sauna(keyword="サウナしきじ")[0]
         assert actual.ikitai == expected.ikitai
 
     def test_get_200(self, mocker):
         mocker.patch(
-            "smart_sauna_map.search_sauna._sub_request", return_value=mock_response(200)
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._sub_request",
+            return_value=mock_response(200),
         )
-        search_sauna(keyword="サウナしきじ", prefecture="shimane", page_index=1)
+        search_sauna(keyword="サウナしきじ")
 
     def test_get_404(self, mocker):
         mocker.patch(
-            "smart_sauna_map.search_sauna._sub_request", return_value=mock_response(404)
+            "smart_sauna_map.searchers.sauna_ikitai_searcher._sub_request",
+            return_value=mock_response(404),
         )
         with pytest.raises(HTTPError):
-            search_sauna(keyword="サウナしきじ", prefecture="tottori", page_index=1)
+            search_sauna(keyword="")
