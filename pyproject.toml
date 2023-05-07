@@ -29,7 +29,7 @@ pytest = "^6.2.5"
 jedi = "^0.18.0"
 snoop = "^0.4.1"
 requests-mock = "^1.9.3"
-ipython = "^7.29.0"
+ipython = "^8.10.0"
 mock = "^4.0.3"
 pytest-mock = "^3.6.1"
 
